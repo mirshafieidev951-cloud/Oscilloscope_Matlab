@@ -1,0 +1,268 @@
+\documentclass[11pt]{article}
+\RequirePackage[2020-02-02]{latexrelease}
+\usepackage{hyperref}
+\usepackage{float}
+\usepackage{amssymb, amsmath}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage[printwatermark]{xwatermark}
+\newwatermark[allpages,color=gray!50,angle=45,scale=2.5,xpos=-5,ypos=-5]{Mohammad Hadi}
+
+\input{structure.tex} % Include the file specifying the document structure and custom commands
+\usepackage{listings} % برای نمایش کد
+\usepackage{xcolor} % برای تعریف رنگ‌ها
+% تعریف سبک برای MATLAB
+\lstdefinestyle{matlab}{
+    language=Matlab, % زبان کد MATLAB
+    basicstyle=\footnotesize\ttfamily, % فونت و اندازه متن
+    numbers=left, % شماره خطوط سمت چپ
+    numberstyle=\tiny, % اندازه شماره خطوط
+    stepnumber=1, % گام شماره‌گذاری خطوط
+    numbersep=5pt, % فاصله از متن
+    backgroundcolor=\color{white}, % رنگ پس‌زمینه
+    showspaces=false, % نمایش فاصله‌ها
+    showstringspaces=false, % نمایش فاصله‌های رشته‌ای
+    showtabs=false, % نمایش تب‌ها
+    frame=single, % قاب
+    rulecolor=\color{black}, % رنگ خط قاب
+    tabsize=2, % اندازه تب
+    captionpos=b, % موقعیت عنوان زیر کد
+    breaklines=true, % شکست خطوط بلند
+    breakatwhitespace=false, % شکست خطوط در فاصله‌ها
+    title=\lstname, % نمایش نام فایل
+    keywordstyle=\color{blue}, % رنگ کلمات کلیدی
+    commentstyle=\color[rgb]{0,0.5,0}, % رنگ توضیحات
+    stringstyle=\color{red}, % رنگ رشته‌ها
+    emph={
+        fft, abs, max, min, linspace, figure, plot,
+        xlabel, ylabel, grid, uicontrol, errordlg,
+        delete, audiorecorder, getaudiodata, recordblocking,
+        drawnow, set, stop
+    },
+    emphstyle=\color{blue}\bfseries, % سبک برای کلمات کلیدی
+    morekeywords={*,...},
+    deletekeywords={...},
+}
+
+\lstset{
+    language=Matlab,
+    basicstyle=\footnotesize\ttfamily,
+    numbers=left,
+    numberstyle=\tiny,
+    stepnumber=1,
+    numbersep=5pt,
+    backgroundcolor=\color{white},
+    showspaces=false,
+    showstringspaces=false,
+    showtabs=false,
+    frame=single,
+    rulecolor=\color{black},
+    tabsize=2,
+    captionpos=b,
+    breaklines=true,
+    breakatwhitespace=false,
+    title=\lstname,
+    linewidth=\textwidth,
+    xleftmargin=0.05\textwidth,
+    belowskip=5pt,
+    aboveskip=5pt,
+    escapeinside={\%*}{*)},
+    morekeywords={*,...},
+    deletekeywords={...},
+}
+
+%----------------------------------------------------------------------------------------
+%   ASSIGNMENT INFORMATION
+%----------------------------------------------------------------------------------------
+
+% Required
+\newcommand{\assignmentQuestionName}{Task} % The word to be used as a prefix to question numbers; example alternatives: Problem, Exercise
+\newcommand{\assignmentClass}{Electrical Circuits (Taught by Mohammad Hadi)\\Final Project (Due on DDD.,\ mmm.\ dd,\ yyyy)} % Course (Lecturer)\\Assignment (Due date)
+\newcommand{\assignmentTitle}{} % Assignment title or name
+\newcommand{\assignmentAuthorName}{Student Name\\Student Number} % Student name\\Student number
+%----------------------------------------------------------------------------------------
+
+\begin{document}
+
+%----------------------------------------------------------------------------------------
+%   TITLE PAGE
+%----------------------------------------------------------------------------------------
+\textbf{Feel free to do one of the following tasks as your final project. I personally prefer the engineering task 
+although it needs to have access to a function generator. In my view, you become familiar with many practical points while doing the engineering task. }
+
+\assignmentSection{Engineering Task}
+
+%----------------------------------------------------------------------------------------
+%   Task 1
+%----------------------------------------------------------------------------------------
+
+\begin{question}
+
+\questiontext{Make a simple oscilloscope by feeding a signal to your laptop via its microphone jack and displaying the captured signal on its monitor. Note that I personally do not take any responsibility for any possible damage to your laptop!}
+
+%--------------------------------------------
+\begin{subquestion}{Write a MATLAB/Python code to display the captured signal online. Feed your oscilloscope with sine, triangle, and square waves and observe the results.} 
+\begin{lstlisting}[style=matlab]
+function simple_oscilloscope()
+    % Recording settings
+    fs = 44100; % Sampling frequency
+    nBits = 16; % Number of bits per sample
+    nChannels = 1; % Number of channels (1 for mono, 2 for stereo)
+    duration = 1; % Recording duration in seconds
+
+    % Create an audiorecorder object
+    recObj = audiorecorder(fs, nBits, nChannels);
+
+    % Create a graphical user interface (GUI)
+    hFig = figure('Name', 'Simple Oscilloscope', 'NumberTitle', 'off', ...
+                  'CloseRequestFcn', @closeFigure, 'Position', [100, 100, 800, 600]);
+    hAxes = axes('Parent', hFig, 'Position', [0.1, 0.3, 0.8, 0.6]);
+    hLine = plot(hAxes, NaN, NaN);
+    xlabel(hAxes, 'Time (seconds)');
+    ylabel(hAxes, 'Amplitude');
+    grid(hAxes, 'on');
+    
+    % GUI controls for displaying frequency and amplitude
+    uicontrol('Style', 'text', 'String', 'Frequency (Hz):', 'Position', [20 100 100 20]);
+    hFreq = uicontrol('Style', 'text', 'String', '0', 'Position', [120 100 100 20]);
+    uicontrol('Style', 'text', 'String', 'Amplitude:', 'Position', [20 70 100 20]);
+    hAmp = uicontrol('Style', 'text', 'String', '0', 'Position', [120 70 100 20]);
+    
+    % Controls for changing time axis scale
+    uicontrol('Style', 'text', 'String', 'Time Scale (seconds):', 'Position', [20 40 100 20]);
+    hScale = uicontrol('Style', 'edit', 'String', num2str(duration), 'Position', [120 40 100 20]);
+    uicontrol('Style', 'pushbutton', 'String', 'Apply', 'Position', [230 40 50 20], 'Callback', @updateScale);
+
+    % Continuous recording and display of signal
+    while ishandle(hFig)
+        recordblocking(recObj, duration);
+        y = getaudiodata(recObj);
+        
+        % Normalize the signal
+        y = y / max(abs(y));
+        
+        t = linspace(0, duration, length(y));
+        
+        % Update the plot
+        set(hLine, 'XData', t, 'YData', y);
+        drawnow;
+
+        % Calculate and display frequency and amplitude
+        Y = fft(y);
+        f = (0:length(Y)-1)*fs/length(Y);
+        [~, idx] = max(abs(Y));
+        freq = f(idx);
+        
+        % Calculate peak-to-peak amplitude
+        amp = (max(y) - min(y)) / 2;
+        
+        set(hFreq, 'String', num2str(freq, '%.2f'));
+        set(hAmp, 'String', num2str(amp, '%.2f'));
+    end
+
+    function closeFigure(~, ~)
+        stop(recObj);
+        delete(hFig);
+    end
+
+    function updateScale(~, ~)
+        newScale = str2double(get(hScale, 'String'));
+        if isnan(newScale) || newScale <= 0
+            errordlg('Time scale must be a positive number.', 'Error');
+        else
+            duration = newScale;
+        end
+    end
+end
+\end{lstlisting}
+
+
+\answer{
+The signal generated by the function generator:\\
+\begin{figure}[H] 
+\begin{center}
+\includegraphics[width=7cm,height = 7cm]{Fig/Untitled1.png}
+\end{center}
+\end{figure}
+
+Sinusoidal signal:\\
+\begin{figure}[H] 
+\begin{center}
+\includegraphics[width=7cm,height = 7cm]{Fig/Untitled2.png}
+\end{center}
+\end{figure}
+
+Triangular signal:\\
+\begin{figure}[H] 
+\begin{center}
+\includegraphics[width=7cm,height = 7cm]{Fig/Untitled3.png}
+\end{center}
+\end{figure}
+
+And finally, the square signal:\\
+\begin{figure}[H] 
+\begin{center}
+\includegraphics[width=7cm,height = 7cm]{Fig/Untitled4.png}
+\end{center}
+\end{figure}
+For the received signal through the laptop microphone.\\
+\begin{figure}[H] 
+\begin{center}
+\includegraphics[width=7cm,height = 7cm]{Fig/Untitled5.png}
+\end{center}
+\end{figure}
+}
+\end{subquestion}
+%--------------------------------------------
+\begin{subquestion}{Is there any limitation on the maximum amplitude and frequency of your oscilloscope?} 
+\answer{
+Yes, the oscilloscope used has limitations on the maximum amplitude and frequency.\\
+\\
+Maximum Amplitude Limitations
+Input Voltage Range: The oscilloscope is simulated using a 3.5mm jack input connected to a sound card. The typical voltage range for a sound card input is between ±1V to ±2V. If the signal amplitude exceeds this range, the sound card and oscilloscope might be damaged or the signal might not be displayed correctly.\\
+\\
+Maximum Frequency Limitations
+Sampling Rate: The sampling rate of this oscilloscope is 44.1 kHz, which according to the Nyquist theorem, limits the maximum measurable frequency to 22.05 kHz. Signals with frequencies higher than this will not be measured accurately and will experience aliasing effects.
+}
+\end{subquestion}
+
+%--------------------------------------------
+\begin{subquestion}{Prepare a short report and describe your work concisely. Use suitable figures or equations to  better describe different parts of your code and to make your report more readable and understandable. Take a short video of yourself demonstrating the performance of your oscilloscope. 
+} 
+\answer{
+"The video has been sent along with the LaTeX file."\\
+To display sinusoidal, triangular, and square wave signals (or any signal injected into the laptop's sound card) on a laptop, follow these steps:\\
+\\
+First, connect the 3.5mm headphone jack to the laptop's 3.5mm jack as shown in the image below:\\
+\begin{figure}[H] 
+\begin{center}
+\includegraphics[width=12cm,height = 7cm]{Fig/jack.jpg}
+\end{center}
+\end{figure}
+As depicted in the image, connect one end of the received signal (positive end) to the microphone pin, and connect the other end of the received signal (negative end) to the headphone ground pin.\\
+\\
+Finally, by running the MATLAB code and ensuring specific settings in the sound section of the control panel (Noise Suppression must be disabled for accurate signal display), we can display the received signal from the function generator.\\
+And now, some explanations about the MATLAB code:\\
+\\
+This MATLAB code simulates a simple oscilloscope to display audio signals received through the 3.5mm jack input of a laptop. The code sets up recording parameters such as sampling rate (44.1 kHz), bit depth (16 bits), and the number of channels (mono). Then, it creates a graphical user interface (GUI) with a plot to display the signal and controls to show frequency, amplitude, and adjust the time scale. In an infinite loop, the audio signal is recorded, normalized, and displayed on the plot. To calculate the frequency, a Fast Fourier Transform (FFT) is applied to the signal, and the dominant frequency is extracted. The peak-to-peak amplitude is also calculated and displayed.
+}
+\end{subquestion}
+
+
+%--------------------------------------------
+\begin{subquestion}{\textbf{Bonus!} Create a GUI for your oscilloscope such that useful information like frequency, amplitude, and so on are reported alongside the captured wave.
+} 
+\answer{As shown in the image below, a graphical interface has been designed that creates a window named "Simple Oscilloscope." This window includes two axes, vertical and horizontal, which display voltage and time, respectively. Additionally, two labels have been created to show the voltage and frequency values, which are updated in real-time.\\
+For adjusting the horizontal time axis, the time scale value is taken as input from the user, which is set to 0.01 seconds in the image above.\\
+Further details can be seen in the provided MATLAB code.\\
+}
+\end{subquestion}
+
+%--------------------------------------------
+\begin{subquestion}{\textbf{Bonus!} Write your report in \LaTeX.
+} 
+\end{subquestion}
+
+\end{question}
+
+\end{document}
